@@ -134,6 +134,5 @@ export async function submitReview(data: {
 
 export function getImageUrl(path: string): string {
   if (!path) return '/placeholder-product.jpg';
-  if (path.startsWith('http')) return path;
-  return `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'https://vrtaj-backend.onrender.com'}${path}`;
+  return path;
 }
