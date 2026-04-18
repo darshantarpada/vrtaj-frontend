@@ -10,10 +10,14 @@ interface Props {
 export default function ProductCard({ product }: Props) {
   const hasDiscount = product.discountPrice > 0 && product.discountPrice < product.price;
   const displayPrice = hasDiscount ? product.discountPrice : product.price;
+  const discount = hasDiscount
+    ? Math.round(((product.price - product.discountPrice) / product.price) * 100)
+    : 0;
 
   return (
-    <Link href={`/products/${product.slug}`} className="group">
-      <div className="bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+    <Link href={`/products/${product.slug}`} className="group block">
+      <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-300">
+
         {/* Image */}
         <div className="relative aspect-square bg-gray-50 overflow-hidden">
           {product.images[0] ? (
@@ -21,52 +25,76 @@ export default function ProductCard({ product }: Props) {
               src={getImageUrl(product.images[0])}
               alt={product.name}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+              className="object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Package className="w-16 h-16 text-gray-300" />
+            <div className="w-full h-full flex items-center justify-center bg-gray-50">
+              <Package className="w-14 h-14 text-gray-200" />
             </div>
           )}
-          {hasDiscount && (
-            <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-              -{Math.round(((product.price - product.discountPrice) / product.price) * 100)}%
-            </span>
-          )}
+
+          {/* Badges */}
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+            {hasDiscount && (
+              <span className="bg-red-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                -{discount}%
+              </span>
+            )}
+            {product.isFeatured && (
+              <span className="bg-brand-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                Featured
+              </span>
+            )}
+          </div>
+
           {product.stock === 0 && (
-            <span className="absolute top-2 right-2 bg-gray-800 text-white text-xs px-2 py-1 rounded-full">
-              Out of Stock
-            </span>
+            <div className="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[1px]">
+              <span className="bg-gray-900 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                Out of Stock
+              </span>
+            </div>
           )}
         </div>
 
         {/* Info */}
         <div className="p-4">
-          <p className="text-xs text-brand-600 font-medium mb-1">
-            {product.category?.name}
-          </p>
-          <h3 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2 group-hover:text-brand-700 transition-colors">
+          {product.category?.name && (
+            <p className="text-[11px] font-semibold text-brand-600 uppercase tracking-wider mb-1.5">
+              {product.category.name}
+            </p>
+          )}
+
+          <h3 className="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-brand-700 transition-colors mb-2">
             {product.name}
           </h3>
 
-          {/* Rating */}
           {product.reviewCount > 0 && (
-            <div className="flex items-center gap-1 mt-2">
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              <span className="text-xs text-gray-600">
+            <div className="flex items-center gap-1 mb-2.5">
+              <div className="flex gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-3 h-3 ${
+                      i < Math.round(product.averageRating)
+                        ? 'fill-amber-400 text-amber-400'
+                        : 'text-gray-200'
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-[11px] text-gray-500 font-medium">
                 {product.averageRating.toFixed(1)} ({product.reviewCount})
               </span>
             </div>
           )}
 
-          {/* Price */}
-          <div className="mt-3 flex items-center gap-2">
-            <span className="font-bold text-gray-900">
+          <div className="flex items-baseline gap-2">
+            <span className="font-bold text-gray-900 text-base">
               ₹{displayPrice.toLocaleString('en-IN')}
             </span>
             {hasDiscount && (
-              <span className="text-sm text-gray-400 line-through">
+              <span className="text-xs text-gray-400 line-through font-medium">
                 ₹{product.price.toLocaleString('en-IN')}
               </span>
             )}
